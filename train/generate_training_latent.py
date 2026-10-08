@@ -17,7 +17,11 @@ os.environ["PL_TORCH_DISTRIBUTED_BACKEND"] = "gloo"
 
 def generate(args):
 
-    tr_dataset = Singleres_dataset(root_dir=args.data_path,generate_latents = True)
+    tr_dataset = Singleres_dataset(
+        root_dir=args.data_path,
+        generate_latents=True,
+        target_shape=args.target_shape,
+    )
 
     tr_dataloader = DataLoader(tr_dataset, batch_size=args.batch_size,
                                 shuffle=False, num_workers=args.num_workers)
@@ -52,8 +56,12 @@ if __name__ == "__main__":
     parser.add_argument("--AE-ckpt", type=str, required=True)
     parser.add_argument("--batch-size", type=int, default=2) 
     parser.add_argument("--num-workers", type=int, default=8) 
+    parser.add_argument(
+        "--target-shape", nargs=3, type=int, default=[512, 512, 64],
+        metavar=("WIDTH", "HEIGHT", "DEPTH"),
+        help="Resize each source NIfTI volume before encoding (default: 512 512 64)",
+    )
     args = parser.parse_args()
     generate(args)
-
 
 

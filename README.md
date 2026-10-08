@@ -57,6 +57,11 @@ python train/train_PatchVolume.py --config config/PatchVolume_8x.yaml
 1. All training images should be normalized to `[-1, 1]`.  
 2. Update the `default_root_dir`and `root_dir` fileds in `config/PatchVolume_4x.yaml` / `config/PatchVolume_8x.yaml` to match your local paths.
 3. Provide a `data.json` following the format shown in the `config/PatchVolume_data.json` example.
+4. Source NIfTI volumes are resampled with `torchio.Resize` to the configured
+   `dataset.target_shape` before patch sampling. The supplied configs use
+   `[512, 512, 64]`. Set it to `null` to preserve each volume's original shape.
+   For the 8x autoencoder this produces latent tensors with model resolution
+   `[8, 64, 64]` after the dataset's depth-first axis conversion.
 
 
 ### PatchVolume Autoencoder — Stage 2
@@ -74,12 +79,12 @@ python train/train_PatchVolume_stage2.py --config config/PatchVolume_8x_s2.yaml
 
 ### Encode the Images to latents 
 ```
-python train/generate_training_latent.py --data-path config/Singleres_dataset.json --AE-ckpt checkpoints/trained_AE.ckpt --batch-size 4
+python train/generate_training_latent.py --data-path config/Singleres_dataset.json --AE-ckpt checkpoints/trained_AE.ckpt --batch-size 4 --target-shape 512 512 64
 ```
 
 ### BiFlowNet
 ```
-torchrun --nnodes=1 --nproc_per_node=8 --master_port 29513 train/train_BiFlowNet_SingleRes.py --data-path config/Singleres_dataset.json --results-dir  /input/your/results/dir --num-classes 2  --AE-ckpt input/your/AE/checkpoint/path  --resolution 32 32 32  --batch-size 48 --num-workers 48 
+torchrun --nnodes=1 --nproc_per_node=8 --master_port 29513 train/train_BiFlowNet_SingleRes.py --data-path config/Singleres_dataset.json --results-dir /input/your/results/dir --num-classes 2 --AE-ckpt input/your/AE/checkpoint/path --resolution 8 64 64 --batch-size 48 --num-workers 48
 ```
 
 ## Inference
@@ -101,4 +106,4 @@ The pretrained checkpoint is provided [here](https://drive.google.com/drive/fold
 Please download the checkpoints and put it to ./checkpoints.
 
 ## Acknowledgements
-This repository builds upon the following excellent open-source projects: [LDMs](https://github.com/CompVis/latent-diffusion) and [medicaldiffusion](https://github.com/firasgit/medicaldiffusion). 
+This repository builds upon the following excellent open-source projects: [LDMs](https://github.com/CompVis/latent-diffusion) and [medicaldiffusion](https://github.com/firasgit/medicaldiffusion).

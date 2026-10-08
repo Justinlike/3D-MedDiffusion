@@ -21,16 +21,21 @@ def main(cfg_path: str):
     cfg = OmegaConf.load(cfg_path)
     pl.seed_everything(cfg.model.seed)
     downsample_ratio = cfg.model.downsample[0]
+    dataset_kwargs = dict(
+        root_dir=cfg.dataset.root_dir,
+        patch_size=cfg.dataset.patch_size,
+        target_shape=cfg.dataset.get('target_shape', None),
+    )
     if downsample_ratio == 4:
         train_dataset = VQGANDataset_4x(
-            root_dir=cfg.dataset.root_dir,augmentation=True,split='train',stage=cfg.model.stage)
+            augmentation=True, split='train', stage=cfg.model.stage, **dataset_kwargs)
         val_dataset = VQGANDataset_4x(
-            root_dir=cfg.dataset.root_dir,augmentation=False,split='val')
+            augmentation=False, split='val', **dataset_kwargs)
     else:
         train_dataset = VQGANDataset(
-            root_dir=cfg.dataset.root_dir,augmentation=True,split='train',stage=cfg.model.stage)
+            augmentation=True, split='train', stage=cfg.model.stage, **dataset_kwargs)
         val_dataset = VQGANDataset(
-            root_dir=cfg.dataset.root_dir,augmentation=False,split='val')
+            augmentation=False, split='val', **dataset_kwargs)
 
     train_dataloader = DataLoader(dataset=train_dataset, batch_size=cfg.model.batch_size,shuffle=True,
                                   num_workers=cfg.model.num_workers)
@@ -85,6 +90,5 @@ if __name__ == '__main__':
     parser.add_argument("--config", type=str, required=True)
     args = parser.parse_args()
     main(args.config)
-
 
 

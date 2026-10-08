@@ -3,16 +3,20 @@ import torch
 from torch.utils.data.dataset import Dataset
 import os
 import random
+
+from dataset.preprocessing import DEFAULT_TARGET_SHAPE, resize_volume
 import glob
 import torchio as tio
 import json
 import random
 
 class VQGANDataset_4x(Dataset):
-    def __init__(self, root_dir=None, augmentation=False,split='train',stage = 1,patch_size = 64):
+    def __init__(self, root_dir=None, augmentation=False, split='train', stage=1,
+                 patch_size=64, target_shape=DEFAULT_TARGET_SHAPE):
         randnum = 216
         self.file_names = []
         self.stage = stage
+        self.target_shape = target_shape
         print(root_dir)
         if root_dir.endswith('json'):
             with open(root_dir) as json_file:
@@ -46,18 +50,18 @@ class VQGANDataset_4x(Dataset):
 
     def __getitem__(self, index):
         path = self.file_names[index]
-        whole_img = tio.ScalarImage(path)
+        whole_img = resize_volume(tio.ScalarImage(path), self.target_shape)
         if self.stage == 1 and self.split == 'train':
             img = None
             while img== None or img.data.sum() ==0:
                 img = next(self.patch_sampler(tio.Subject(image = whole_img)))['image']
         elif self.stage ==2 and self.split == 'train':
             img = whole_img
-            if img.shape[1]*img.shape[2]*img.shape[3] > 256*256*128:#
+            if self.target_shape is None and img.shape[1]*img.shape[2]*img.shape[3] > 256*256*128:#
                 img = next(self.patch_sampler_256(tio.Subject(image = img)))['image']
         elif self.split =='val':
             img = whole_img
-            if img.shape[1]*img.shape[2]*img.shape[3] > 256*256*128:#
+            if self.target_shape is None and img.shape[1]*img.shape[2]*img.shape[3] > 256*256*128:#
                 img = next(self.patch_sampler_256(tio.Subject(image = img)))['image']
         if self.augmentation:
             img = self.randomflip(img)
