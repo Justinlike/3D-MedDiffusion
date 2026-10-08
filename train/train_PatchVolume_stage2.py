@@ -12,6 +12,7 @@ from AutoEncoder.model.PatchVolume import patchvolumeAE,AE_finetuning
 from train.callbacks import VolumeLogger
 from dataset.vqgan_4x import VQGANDataset_4x
 from dataset.vqgan import VQGANDataset
+from dataset.preprocessing import DEFAULT_TARGET_SHAPE
 import argparse
 from omegaconf import OmegaConf
 import torch
@@ -24,7 +25,7 @@ def main(cfg_path: str):
     dataset_kwargs = dict(
         root_dir=cfg.dataset.root_dir,
         patch_size=cfg.dataset.patch_size,
-        target_shape=cfg.dataset.get('target_shape', None),
+        target_shape=cfg.dataset.get('target_shape', DEFAULT_TARGET_SHAPE),
     )
     if downsample_ratio == 4:
         train_dataset = VQGANDataset_4x(
@@ -90,5 +91,4 @@ if __name__ == '__main__':
     parser.add_argument("--config", type=str, required=True)
     args = parser.parse_args()
     main(args.config)
-
 

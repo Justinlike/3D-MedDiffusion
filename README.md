@@ -60,6 +60,7 @@ python train/train_PatchVolume.py --config config/PatchVolume_8x.yaml
 4. Source NIfTI volumes are resampled with `torchio.Resize` to the configured
    `dataset.target_shape` before patch sampling. The supplied configs use
    `[512, 512, 64]`. Set it to `null` to preserve each volume's original shape.
+   Custom configs that omit this setting also default to `[512, 512, 64]`.
    For the 8x autoencoder this produces latent tensors with model resolution
    `[8, 64, 64]` after the dataset's depth-first axis conversion.
 
