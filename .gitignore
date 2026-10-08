@@ -32,6 +32,7 @@ data/
 datasets/
 data_cba/
 data_522/
+results_522/
 data_png/
 *.gz
 *.zip
