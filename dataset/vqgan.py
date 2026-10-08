@@ -44,6 +44,7 @@ class VQGANDataset(Dataset):
         self.patch_sampler = tio.data.UniformSampler(patch_size)
         self.patch_sampler_192 = tio.data.UniformSampler((192,192,192))
         self.patch_sampler_256 = tio.data.UniformSampler((256,256,256))
+        self.validation_crop = tio.CropOrPad(patch_size)
         self.randomflip = tio.RandomFlip( axes=(0,1),flip_probability=0.5)
         print(f'With patch size {str(patch_size)}')
     def __len__(self):
@@ -52,10 +53,13 @@ class VQGANDataset(Dataset):
     def __getitem__(self, index):
         path = self.file_names[index]
         whole_img = resize_volume(tio.ScalarImage(path), self.target_shape)
-        if self.stage == 1 and self.split == 'train':
-            img = None
-            while img== None or img.data.sum() ==0:
-                img = next(self.patch_sampler(tio.Subject(image = whole_img)))['image']
+        if self.stage == 1:
+            if self.split == 'train':
+                img = None
+                while img== None or img.data.sum() ==0:
+                    img = next(self.patch_sampler(tio.Subject(image = whole_img)))['image']
+            else:
+                img = self.validation_crop(whole_img)
         elif self.stage ==2 and self.split == 'train':
             img = whole_img
             if self.target_shape is None and img.shape[1]*img.shape[2]*img.shape[3] > 256*256*128:

@@ -31,19 +31,19 @@ def main(cfg_path: str):
         train_dataset = VQGANDataset_4x(
             augmentation=True, split='train', stage=cfg.model.stage, **dataset_kwargs)
         val_dataset = VQGANDataset_4x(
-            augmentation=False, split='val', **dataset_kwargs)
+            augmentation=False, split='val', stage=cfg.model.stage, **dataset_kwargs)
     else:
         train_dataset = VQGANDataset(
             augmentation=True, split='train', stage=cfg.model.stage, **dataset_kwargs)
         val_dataset = VQGANDataset(
-            augmentation=False, split='val', **dataset_kwargs)
+            augmentation=False, split='val', stage=cfg.model.stage, **dataset_kwargs)
 
     train_dataloader = DataLoader(dataset=train_dataset, batch_size=cfg.model.batch_size,shuffle=True,
                                   num_workers=cfg.model.num_workers)
 
 
     val_dataloader = DataLoader(val_dataset, batch_size=1,
-                                shuffle=True, num_workers=cfg.model.num_workers)
+                                shuffle=False, num_workers=cfg.model.num_workers)
 
     # automatically adjust learning rate
     bs, lr, ngpu = cfg.model.batch_size, cfg.model.lr, cfg.model.gpus
@@ -91,4 +91,3 @@ if __name__ == '__main__':
     parser.add_argument("--config", type=str, required=True)
     args = parser.parse_args()
     main(args.config)
-

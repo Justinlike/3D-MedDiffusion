@@ -63,6 +63,8 @@ python train/train_PatchVolume.py --config config/PatchVolume_8x.yaml
    Custom configs that omit this setting also default to `[512, 512, 64]`.
    For the 8x autoencoder this produces latent tensors with model resolution
    `[8, 64, 64]` after the dataset's depth-first axis conversion.
+   Stage 1 validation uses a deterministic center patch of `dataset.patch_size`
+   to avoid decoding the complete resized volume during the sanity check.
 
 
 ### PatchVolume Autoencoder — Stage 2
