@@ -4,7 +4,7 @@ model:
   num_workers: 8
 
   gpus: 1
-  default_root_dir: /data/jzk/3D-MedDiffusion/results
+  default_root_dir: /data/jzk/3D-MedDiffusion-reshape-512x512x64/results_522_minmax_stage2
   resume_from_checkpoint: 
   max_steps: 1000000
   max_epochs: 10000
@@ -32,7 +32,7 @@ model:
   stage: 2
 
 dataset:
-  root_dir: 3DMedDiffusion/config/PatchVolume_data_522.json
+  root_dir: /data/jzk/3D-MedDiffusion-reshape-512x512x64/config/PatchVolume_data_522.json
   image_channels: 1
   imgtype: CT
   patch_size: 64
