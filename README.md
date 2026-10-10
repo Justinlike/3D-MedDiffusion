@@ -54,7 +54,11 @@ python train/train_PatchVolume.py --config config/PatchVolume_4x.yaml
 python train/train_PatchVolume.py --config config/PatchVolume_8x.yaml
 ```
 **Note:**  
-1. All training images should be normalized to `[-1, 1]`.  
+1. Source intensities are normalized per volume to `[0, 1]` after resizing and
+   then mapped to `[-1, 1]`. This follows the NCCT2CCTA preprocessing style and
+   is controlled by `dataset.intensity_normalization: minmax`. Use `none` only
+   when the stored NIfTI data is already in `[0, 1]`; out-of-range data will
+   raise an error instead of silently starting an invalid training run.
 2. Update the `default_root_dir`and `root_dir` fileds in `config/PatchVolume_4x.yaml` / `config/PatchVolume_8x.yaml` to match your local paths.
 3. Provide a `data.json` following the format shown in the `config/PatchVolume_data.json` example.
 4. Source NIfTI volumes are resampled with `torchio.Resize` to the configured
@@ -82,7 +86,7 @@ python train/train_PatchVolume_stage2.py --config config/PatchVolume_8x_s2.yaml
 
 ### Encode the Images to latents 
 ```
-python train/generate_training_latent.py --data-path config/Singleres_dataset.json --AE-ckpt checkpoints/trained_AE.ckpt --batch-size 4 --target-shape 512 512 64
+python train/generate_training_latent.py --data-path config/Singleres_dataset.json --AE-ckpt checkpoints/trained_AE.ckpt --batch-size 4 --target-shape 512 512 64 --intensity-normalization minmax
 ```
 
 ### BiFlowNet

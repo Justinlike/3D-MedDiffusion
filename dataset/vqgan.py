@@ -4,7 +4,11 @@ from torch.utils.data.dataset import Dataset
 import os
 import random
 
-from dataset.preprocessing import DEFAULT_TARGET_SHAPE, resize_volume
+from dataset.preprocessing import (
+    DEFAULT_INTENSITY_NORMALIZATION,
+    DEFAULT_TARGET_SHAPE,
+    preprocess_volume,
+)
 import glob
 import torchio as tio
 import json
@@ -12,11 +16,13 @@ import random
 
 class VQGANDataset(Dataset):
     def __init__(self, root_dir=None, augmentation=False, split='train', stage=1,
-                 patch_size=64, target_shape=DEFAULT_TARGET_SHAPE):
+                 patch_size=64, target_shape=DEFAULT_TARGET_SHAPE,
+                 intensity_normalization=DEFAULT_INTENSITY_NORMALIZATION):
         randnum = 216
         self.file_names = []
         self.stage = stage
         self.target_shape = target_shape
+        self.intensity_normalization = intensity_normalization
         print(root_dir)
         if root_dir.endswith('json'):
             with open(root_dir) as json_file:
@@ -47,12 +53,15 @@ class VQGANDataset(Dataset):
         self.validation_crop = tio.CropOrPad(patch_size)
         self.randomflip = tio.RandomFlip( axes=(0,1),flip_probability=0.5)
         print(f'With patch size {str(patch_size)}')
+        print(f'Intensity normalization: {self.intensity_normalization}')
     def __len__(self):
         return len(self.file_names)
 
     def __getitem__(self, index):
         path = self.file_names[index]
-        whole_img = resize_volume(tio.ScalarImage(path), self.target_shape)
+        whole_img = preprocess_volume(
+            tio.ScalarImage(path), self.target_shape, self.intensity_normalization
+        )
         if self.stage == 1:
             if self.split == 'train':
                 img = None

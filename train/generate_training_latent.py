@@ -21,6 +21,7 @@ def generate(args):
         root_dir=args.data_path,
         generate_latents=True,
         target_shape=args.target_shape,
+        intensity_normalization=args.intensity_normalization,
     )
 
     tr_dataloader = DataLoader(tr_dataset, batch_size=args.batch_size,
@@ -60,6 +61,10 @@ if __name__ == "__main__":
         "--target-shape", nargs=3, type=int, default=[512, 512, 64],
         metavar=("WIDTH", "HEIGHT", "DEPTH"),
         help="Resize each source NIfTI volume before encoding (default: 512 512 64)",
+    )
+    parser.add_argument(
+        "--intensity-normalization", choices=("minmax", "none"), default="minmax",
+        help="Normalize each resized source volume before encoding (default: minmax)",
     )
     args = parser.parse_args()
     generate(args)

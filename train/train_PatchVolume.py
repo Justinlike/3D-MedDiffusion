@@ -14,7 +14,7 @@ from AutoEncoder.model.PatchVolume import patchvolumeAE
 from train.callbacks import VolumeLogger
 from dataset.vqgan_4x import VQGANDataset_4x
 from dataset.vqgan import VQGANDataset
-from dataset.preprocessing import DEFAULT_TARGET_SHAPE
+from dataset.preprocessing import DEFAULT_INTENSITY_NORMALIZATION, DEFAULT_TARGET_SHAPE
 import argparse
 from omegaconf import OmegaConf
 
@@ -29,6 +29,9 @@ def main(cfg_path: str):
         root_dir=cfg.dataset.root_dir,
         patch_size=cfg.dataset.patch_size,
         target_shape=cfg.dataset.get('target_shape', DEFAULT_TARGET_SHAPE),
+        intensity_normalization=cfg.dataset.get(
+            'intensity_normalization', DEFAULT_INTENSITY_NORMALIZATION
+        ),
     )
     if downsample_ratio == 4:
         train_dataset = VQGANDataset_4x(

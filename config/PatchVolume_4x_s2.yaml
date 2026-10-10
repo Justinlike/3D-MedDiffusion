@@ -37,3 +37,4 @@ dataset:
   imgtype: CT
   patch_size: 64
   target_shape: [512, 512, 64]
+  intensity_normalization: minmax

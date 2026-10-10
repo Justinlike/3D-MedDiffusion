@@ -9,15 +9,21 @@ import numpy as np
 import json 
 import torchio as tio
 
-from dataset.preprocessing import DEFAULT_TARGET_SHAPE, resize_volume
+from dataset.preprocessing import (
+    DEFAULT_INTENSITY_NORMALIZATION,
+    DEFAULT_TARGET_SHAPE,
+    preprocess_volume,
+)
 
 class Singleres_dataset(Dataset):
     def __init__(self, root_dir=None, resolution=[32, 32, 32], generate_latents=False,
-                 target_shape=DEFAULT_TARGET_SHAPE):
+                 target_shape=DEFAULT_TARGET_SHAPE,
+                 intensity_normalization=DEFAULT_INTENSITY_NORMALIZATION):
         self.all_files = []
         self.resolution = resolution
         self.generate_latents = generate_latents
         self.target_shape = target_shape
+        self.intensity_normalization = intensity_normalization
         if root_dir.endswith('json'):
             with open(root_dir) as json_file:
                 dataroots = json.load(json_file)
@@ -42,7 +48,9 @@ class Singleres_dataset(Dataset):
     def __getitem__(self, index):
         if self.generate_latents:
             file_path = list(self.all_files[index].items())[0][1]
-            img = resize_volume(tio.ScalarImage(file_path), self.target_shape)
+            img = preprocess_volume(
+                tio.ScalarImage(file_path), self.target_shape, self.intensity_normalization
+            )
             img_data = img.data.to(torch.float32)
             imageout = img_data * 2 - 1
             imageout = imageout.transpose(1,3).transpose(2,3)
